@@ -8,7 +8,7 @@
     "broker": {
         "host": "localhost",
         "port": 1883,
-        "client_id": "sumo-sensor-manual",
+        "client_id": "sumo-sensor-custom",
         "topic_pattern": "sumo/sensor/{id}/data",
         "keepalive": 60
     },
@@ -24,10 +24,26 @@
             "enableMetrics": true
         },
         {
-            "sensorId": "1339097431",
-            "intersectionType": "4-way-intersection",
-            "detectionRadius": 80.0,
+            "sensorId": "custom_sensor_1",
+            "intersectionType": "custom",
+            "detectionRadius": 100.0,
             "publishInterval": 1.0,
+            "position": {
+                "x": 3500.0,
+                "y": 4000.0
+            },
+            "enableRawData": true,
+            "enableMetrics": true
+        },
+        {
+            "sensorId": "custom_sensor_2",
+            "intersectionType": "custom",
+            "detectionRadius": 120.0,
+            "publishInterval": 1.0,
+            "position": {
+                "x": 4000.0,
+                "y": 3500.0
+            },
             "enableRawData": true,
             "enableMetrics": true
         }

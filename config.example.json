@@ -1,6 +1,6 @@
 {
     "sumo": {
-        "binary": "sumo",
+        "binary": "sumo-gui",
         "config_file": "./assets/2026-02-24-23-58-01/osm.sumocfg",
         "mode": "launch",
         "port": 8813
@@ -13,5 +13,6 @@
         "keepalive": 60
     },
     "auto_discover_junctions": true,
+    "enable_visualization": true,
     "sensors": []
 }

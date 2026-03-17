@@ -68,20 +68,30 @@ class DataCollector:
 
         # Collect road data for each incoming edge
         roads = []
-        for edge_id in junction_info.incoming_edges:
-            try:
-                road = self._collect_road_data(
-                    edge_id,
-                    junction_id,
-                    sensor_config.detectionRadius,
-                    position
-                )
-                if road:
-                    roads.append(road)
-            except Exception as e:
-                # Skip this road if data collection fails
-                print(f"Warning: Failed to collect data for edge {edge_id}: {e}")
-                continue
+
+        if not junction_info.incoming_edges:
+            # Custom position with no edges - collect vehicles within radius from all edges
+            self._collect_vehicles_in_radius_all_edges(
+                position,
+                sensor_config.detectionRadius,
+                roads
+            )
+        else:
+            # Normal junction - collect road data for each incoming edge
+            for edge_id in junction_info.incoming_edges:
+                try:
+                    road = self._collect_road_data(
+                        edge_id,
+                        junction_id,
+                        sensor_config.detectionRadius,
+                        position
+                    )
+                    if road:
+                        roads.append(road)
+                except Exception as e:
+                    # Skip this road if data collection fails
+                    print(f"Warning: Failed to collect data for edge {edge_id}: {e}")
+                    continue
 
         # Compute intersection metrics
         intersection_metrics = self._compute_intersection_metrics(roads)
@@ -576,6 +586,76 @@ class DataCollector:
         # This is a simplified version - in reality, you'd calculate
         # based on edge geometry
         return RoadDirection.CUSTOM
+
+    def _collect_vehicles_in_radius_all_edges(
+        self,
+        position: Position,
+        radius: float,
+        roads: List[Road]
+    ):
+        """
+        Collect vehicles from all edges within detection radius.
+        Used for custom sensor positions without specific edges.
+
+        Args:
+            position: Sensor center position
+            radius: Detection radius in meters
+            roads: List to append collected road data to
+        """
+        try:
+            # Get all edges in the simulation
+            all_edge_ids = traci.edge.getIDList()
+
+            # Track which edges have been processed
+            processed_edges = set()
+
+            # Collect road data for edges that have vehicles within radius
+            for edge_id in all_edge_ids:
+                # Skip internal edges
+                if edge_id.startswith(':'):
+                    continue
+
+                # Skip if already processed
+                if edge_id in processed_edges:
+                    continue
+
+                try:
+                    # Get vehicles on this edge
+                    vehicle_ids = traci.edge.getLastStepVehicleIDs(edge_id)
+
+                    # Check if any vehicle is within radius
+                    has_vehicle_in_radius = False
+                    for vid in vehicle_ids:
+                        try:
+                            veh_pos = traci.vehicle.getPosition(vid)
+                            distance = math.sqrt(
+                                (veh_pos[0] - position.x) ** 2 +
+                                (veh_pos[1] - position.y) ** 2
+                            )
+                            if distance <= radius:
+                                has_vehicle_in_radius = True
+                                break
+                        except:
+                            continue
+
+                    # If edge has vehicles in radius, collect road data
+                    if has_vehicle_in_radius:
+                        road = self._collect_road_data(
+                            edge_id,
+                            f"custom_{position.x}_{position.y}",
+                            radius,
+                            position
+                        )
+                        if road:
+                            roads.append(road)
+                            processed_edges.add(edge_id)
+
+                except Exception as e:
+                    # Skip this edge on error
+                    continue
+
+        except Exception as e:
+            print(f"Warning: Failed to collect vehicles in radius: {e}")
 
     def _compute_intersection_metrics(self, roads: List[Road]) -> IntersectionMetrics:
         """Compute aggregated intersection metrics"""

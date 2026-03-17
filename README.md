@@ -126,6 +126,51 @@ Manually specify which junctions to monitor:
 }
 ```
 
+### Custom Position Mode
+
+Create sensors at custom x,y positions (useful for monitoring specific road segments or areas):
+
+```json
+{
+    "sumo": {
+        "binary": "sumo-gui",
+        "config_file": "./assets/2026-02-24-23-58-01/osm.sumocfg",
+        "mode": "launch",
+        "port": 8813
+    },
+    "broker": {
+        "host": "localhost",
+        "port": 1883,
+        "client_id": "sumo-sensor-custom",
+        "topic_pattern": "sumo/sensor/{id}/data",
+        "keepalive": 60
+    },
+    "auto_discover_junctions": false,
+    "enable_visualization": true,
+    "sensors": [
+        {
+            "sensorId": "custom_sensor_1",
+            "intersectionType": "custom",
+            "detectionRadius": 100.0,
+            "publishInterval": 1.0,
+            "position": {
+                "x": 3500.0,
+                "y": 4000.0
+            },
+            "enableRawData": true,
+            "enableMetrics": true
+        }
+    ]
+}
+```
+
+**Important:** When using custom positions:
+- The `sensorId` can be any unique string (doesn't need to match a junction ID)
+- The `position` object with `x` and `y` coordinates is **required**
+- The sensor will collect data from all vehicles within the detection radius
+- No road/edge data will be collected (only vehicles and aggregate metrics)
+- Perfect for monitoring highway segments, parking lots, or custom areas
+
 ### Configuration Fields
 
 #### SUMO Configuration
@@ -149,15 +194,24 @@ Manually specify which junctions to monitor:
 
 #### Sensor Configuration (Manual Mode)
 
-| Field              | Type    | Required | Description                                                                                        |
-| ------------------ | ------- | -------- | -------------------------------------------------------------------------------------------------- |
-| `sensorId`         | string  | yes      | Junction ID from SUMO network                                                                      |
-| `intersectionType` | string  | yes      | One of: `4-way-intersection`, `t-junction`, `roundabout`, `y-junction`, `traffic-circle`, `custom` |
-| `detectionRadius`  | float   | no       | Detection radius in meters (default: 80.0)                                                         |
-| `publishInterval`  | float   | no       | Publish interval in seconds (default: 1.0)                                                         |
-| `position`         | object  | no       | Override position: `{x: float, y: float}`                                                          |
-| `enableRawData`    | boolean | no       | Publish to MQTT (default: true)                                                                    |
-| `enableMetrics`    | boolean | no       | Include metrics (default: true)                                                                    |
+| Field              | Type    | Required | Description                                                                                                                          |
+| ------------------ | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `sensorId`         | string  | yes      | Junction ID from SUMO network OR any unique string for custom positions                                                             |
+| `intersectionType` | string  | yes      | One of: `4-way-intersection`, `t-junction`, `roundabout`, `y-junction`, `traffic-circle`, `custom`                                   |
+| `detectionRadius`  | float   | no       | Detection radius in meters (default: 80.0)                                                                                           |
+| `publishInterval`  | float   | no       | Publish interval in seconds (default: 1.0)                                                                                           |
+| `position`         | object  | no\*     | Custom position: `{x: float, y: float}`. **Required** if sensorId doesn't match a junction. Optional to override junction position. |
+| `enableRawData`    | boolean | no       | Publish to MQTT (default: true)                                                                                                      |
+| `enableMetrics`    | boolean | no       | Include metrics (default: true)                                                                                                      |
+
+\* `position` is required if the `sensorId` doesn't match any junction in the network.
+
+#### Root Configuration Options
+
+| Field                       | Type    | Required | Description                                                                          |
+| --------------------------- | ------- | -------- | ------------------------------------------------------------------------------------ |
+| `auto_discover_junctions`   | boolean | no       | If `true`, automatically create sensors for all junctions (default: false)           |
+| `enable_visualization`      | boolean | no       | If `true`, draw sensor detection zones in SUMO GUI (default: true)                   |
 
 ## Usage
 

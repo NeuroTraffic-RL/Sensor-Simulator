@@ -49,6 +49,7 @@ class Config:
     broker: BrokerConfig
     sensors: List[SensorConfig]
     auto_discover_junctions: bool = False  # If True, auto-discover ALL junctions
+    enable_visualization: bool = True  # If True, draw sensor zones in SUMO GUI
 
 
 def load_config(config_path: str) -> Config:
@@ -161,7 +162,8 @@ def load_config(config_path: str) -> Config:
         sumo=sumo_config,
         broker=broker_config,
         sensors=sensors,
-        auto_discover_junctions=auto_discover
+        auto_discover_junctions=auto_discover,
+        enable_visualization=data.get('enable_visualization', True)
     )
 
 

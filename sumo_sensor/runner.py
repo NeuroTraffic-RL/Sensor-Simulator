@@ -22,6 +22,7 @@ from .utils.net_parser import (
     JunctionInfo
 )
 from .utils.logger import setup_logger, get_logger
+from .utils.visualization import draw_all_sensor_zones, COLOR_SCHEME_DEFAULT
 
 
 class SimulationRunner:
@@ -100,6 +101,14 @@ class SimulationRunner:
                 self.sensors.append(sensor)
 
             self.logger.info(f"Created {len(self.sensors)} sensors")
+
+            # Draw sensor detection zones in SUMO (if enabled)
+            if self.config.enable_visualization:
+                self.logger.info("Drawing sensor detection zones...")
+                zones_drawn = draw_all_sensor_zones(self.sensors, COLOR_SCHEME_DEFAULT, layer=0)
+                self.logger.info(f"Drew {zones_drawn} sensor zones")
+            else:
+                self.logger.info("Visualization disabled, skipping sensor zones")
 
             return True
 
@@ -204,14 +213,41 @@ class SimulationRunner:
 
             if invalid_ids:
                 self.logger.warning(
-                    f"Invalid junction IDs in config (will be skipped): {', '.join(invalid_ids)}"
+                    f"Junction IDs not found in network: {', '.join(invalid_ids)}"
                 )
 
             for sensor_config in self.config.sensors:
+                junction_info = None
+
                 if sensor_config.sensorId in valid_ids:
+                    # Junction exists in network - use actual junction info
                     junction_info = get_junction_by_id(junctions, sensor_config.sensorId)
-                    if junction_info:
-                        sensor_configs.append((sensor_config, junction_info))
+
+                elif sensor_config.position is not None:
+                    # Junction doesn't exist, but custom position provided - create synthetic junction
+                    self.logger.info(
+                        f"Creating sensor '{sensor_config.sensorId}' at custom position "
+                        f"({sensor_config.position['x']}, {sensor_config.position['y']})"
+                    )
+                    junction_info = JunctionInfo(
+                        id=sensor_config.sensorId,
+                        x=sensor_config.position['x'],
+                        y=sensor_config.position['y'],
+                        type='custom',
+                        incoming_edges=[],  # No edges for custom position
+                        shape=None
+                    )
+
+                else:
+                    # Junction doesn't exist and no position provided - skip
+                    self.logger.error(
+                        f"Sensor '{sensor_config.sensorId}' cannot be created: "
+                        f"junction not found in network and no custom position provided"
+                    )
+                    continue
+
+                if junction_info:
+                    sensor_configs.append((sensor_config, junction_info))
 
             self.logger.info(f"Configured {len(sensor_configs)} sensors from config")
 

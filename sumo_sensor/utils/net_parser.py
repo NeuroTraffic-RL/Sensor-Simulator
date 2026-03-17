@@ -189,3 +189,4 @@ def validate_junction_ids(
     invalid_ids = [sid for sid in sensor_ids if sid not in junction_ids]
 
     return valid_ids, invalid_ids
+
