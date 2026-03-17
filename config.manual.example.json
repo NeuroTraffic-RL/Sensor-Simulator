@@ -1,0 +1,34 @@
+{
+    "sumo": {
+        "binary": "sumo",
+        "config_file": "./assets/2026-02-24-23-58-01/osm.sumocfg",
+        "mode": "launch",
+        "port": 8813
+    },
+    "broker": {
+        "host": "localhost",
+        "port": 1883,
+        "client_id": "sumo-sensor-manual",
+        "topic_pattern": "sumo/sensor/{id}/data",
+        "keepalive": 60
+    },
+    "auto_discover_junctions": false,
+    "sensors": [
+        {
+            "sensorId": "junction_1",
+            "intersectionType": "4-way-intersection",
+            "detectionRadius": 80.0,
+            "publishInterval": 1.0,
+            "enableRawData": true,
+            "enableMetrics": true
+        },
+        {
+            "sensorId": "junction_2",
+            "intersectionType": "t-junction",
+            "detectionRadius": 60.0,
+            "publishInterval": 1.0,
+            "enableRawData": true,
+            "enableMetrics": true
+        }
+    ]
+}

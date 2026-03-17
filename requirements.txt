@@ -1,0 +1,11 @@
+# SUMO-RL Traffic Sensor Simulator Requirements
+# Python 3.10+
+
+# SUMO TraCI is bundled with SUMO installation
+# Make sure SUMO is installed and SUMO_HOME is set
+
+# XML parsing
+lxml>=4.9.0
+
+# Optional: environment variable support
+python-dotenv>=1.0.0
