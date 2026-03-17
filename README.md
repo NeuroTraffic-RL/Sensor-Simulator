@@ -4,6 +4,8 @@
 
 Python-based intersection sensor simulator that integrates with SUMO via TraCI. Auto-discovers all junctions in a user-supplied `.net.xml` network, attaches one sensor per junction, collects raw traffic data at 1-second intervals, and publishes to an MQTT broker while printing to stdout.
 
+![](./assets/demo.gif)
+
 ## Features
 
 - **Auto-discovery**: Automatically discovers all junctions in SUMO network
@@ -165,6 +167,7 @@ Create sensors at custom x,y positions (useful for monitoring specific road segm
 ```
 
 **Important:** When using custom positions:
+
 - The `sensorId` can be any unique string (doesn't need to match a junction ID)
 - The `position` object with `x` and `y` coordinates is **required**
 - The sensor will collect data from all vehicles within the detection radius
@@ -194,24 +197,24 @@ Create sensors at custom x,y positions (useful for monitoring specific road segm
 
 #### Sensor Configuration (Manual Mode)
 
-| Field              | Type    | Required | Description                                                                                                                          |
-| ------------------ | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Field              | Type    | Required | Description                                                                                                                         |
+| ------------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | `sensorId`         | string  | yes      | Junction ID from SUMO network OR any unique string for custom positions                                                             |
-| `intersectionType` | string  | yes      | One of: `4-way-intersection`, `t-junction`, `roundabout`, `y-junction`, `traffic-circle`, `custom`                                   |
-| `detectionRadius`  | float   | no       | Detection radius in meters (default: 80.0)                                                                                           |
-| `publishInterval`  | float   | no       | Publish interval in seconds (default: 1.0)                                                                                           |
+| `intersectionType` | string  | yes      | One of: `4-way-intersection`, `t-junction`, `roundabout`, `y-junction`, `traffic-circle`, `custom`                                  |
+| `detectionRadius`  | float   | no       | Detection radius in meters (default: 80.0)                                                                                          |
+| `publishInterval`  | float   | no       | Publish interval in seconds (default: 1.0)                                                                                          |
 | `position`         | object  | no\*     | Custom position: `{x: float, y: float}`. **Required** if sensorId doesn't match a junction. Optional to override junction position. |
-| `enableRawData`    | boolean | no       | Publish to MQTT (default: true)                                                                                                      |
-| `enableMetrics`    | boolean | no       | Include metrics (default: true)                                                                                                      |
+| `enableRawData`    | boolean | no       | Publish to MQTT (default: true)                                                                                                     |
+| `enableMetrics`    | boolean | no       | Include metrics (default: true)                                                                                                     |
 
 \* `position` is required if the `sensorId` doesn't match any junction in the network.
 
 #### Root Configuration Options
 
-| Field                       | Type    | Required | Description                                                                          |
-| --------------------------- | ------- | -------- | ------------------------------------------------------------------------------------ |
-| `auto_discover_junctions`   | boolean | no       | If `true`, automatically create sensors for all junctions (default: false)           |
-| `enable_visualization`      | boolean | no       | If `true`, draw sensor detection zones in SUMO GUI (default: true)                   |
+| Field                     | Type    | Required | Description                                                                |
+| ------------------------- | ------- | -------- | -------------------------------------------------------------------------- |
+| `auto_discover_junctions` | boolean | no       | If `true`, automatically create sensors for all junctions (default: false) |
+| `enable_visualization`    | boolean | no       | If `true`, draw sensor detection zones in SUMO GUI (default: true)         |
 
 ## Usage
 
@@ -301,6 +304,17 @@ Example topic: `sumo/sensor/junction_123/data`
 Payload: Compact JSON (same structure as stdout but minified)
 
 QoS: 0 (at most once)
+
+**📘 For complete API documentation including:**
+
+- Full JSON schema and data types
+- Field descriptions and units
+- Example payloads with traffic
+- Code examples for consuming data
+- Traffic light structures
+- Congestion detection patterns
+
+**See [API.md](API.md)**
 
 ### Logs
 
